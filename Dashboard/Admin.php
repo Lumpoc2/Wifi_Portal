@@ -1,3 +1,56 @@
+<?php
+function getMacAddress() {
+    $macAddress = '';
+    
+    $osType = strtoupper(substr(PHP_OS, 0, 3));
+    
+    if ($osType === 'WIN') {
+        // Windows
+        $command = 'ipconfig /all';
+        ob_start();
+        passthru($command);
+        $output = ob_get_clean();
+        
+        $pattern = '/Physical\s+Address\s+:\s+([0-9A-Fa-f\-:]+)/';
+        if (preg_match($pattern, $output, $matches)) {
+            $macAddress = str_replace('-', ':', $matches[1]);
+        }
+    } elseif ($osType === 'LIN') {
+        // Linux
+        $command = '/sbin/ifconfig';
+        ob_start();
+        passthru($command);
+        $output = ob_get_clean();
+        
+        $pattern = '/([0-9A-Fa-f\-:]{17})/';
+        if (preg_match($pattern, $output, $matches)) {
+            $macAddress = $matches[1];
+        }
+    } else {
+        $macAddress = 'Unsupported OS';
+    }
+    
+    return $macAddress;
+}
+
+function getPublicIpAddress() {
+    $apiUrl = 'https://api.ipify.org?format=json';
+    
+    $response = file_get_contents($apiUrl);
+    if ($response !== false) {
+        $data = json_decode($response, true);
+        if (isset($data['ip'])) {
+            return $data['ip'];
+        }
+    }
+    
+    return 'Unknown';
+}
+
+$macAddress = getMacAddress();
+$publicIpAddress = getPublicIpAddress();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -298,8 +351,8 @@
                       <span class="timeline-badge border-2 border border-info flex-shrink-0 my-8"></span>
                       <span class="timeline-badge-border d-block flex-shrink-0"></span>
                     </div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1">Mac address</div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1">IP address</div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1"><?php echo "MAC : " . $macAddress; ?></div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1"><?php echo "IP : " . $publicIpAddress;?></div>
                   </li>
                   <li class="timeline-item d-flex position-relative overflow-hidden">
                     <div class="timeline-time text-dark flex-shrink-0 text-end">12:00 am</div>
@@ -307,8 +360,8 @@
                       <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
                       <span class="timeline-badge-border d-block flex-shrink-0"></span>
                     </div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1">Mac address</div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1">IP address</div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1"><?php echo "MAC : " . $macAddress; ?></div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1"><?php echo "IP : " . $publicIpAddress;?></div>
                     
                   </li>
                   <li class="timeline-item d-flex position-relative overflow-hidden">
@@ -316,7 +369,8 @@
                     <div class="timeline-badge-wrap d-flex flex-column align-items-center">
                       <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
                     </div>
-                    <div class="timeline-desc fs-3 text-dark mt-n1">Payment Done</div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1"><?php echo "MAC : " . $macAddress; ?></div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1"><?php echo "IP : " . $publicIpAddress;?></div>
                   </li>
                     
                 </ul>
