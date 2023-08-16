@@ -1,3 +1,5 @@
+<!-- You need to get the logs in mikrotik to Display and call the data to display in dashboard -->
+
 <?php
 function getMacAddress() {
     $macAddress = '';
